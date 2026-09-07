@@ -358,12 +358,14 @@
     margin:-8px auto 14px; cursor:grab; touch-action:none; flex:0 0 auto;
   }
   .drag-handle:active{ cursor:grabbing; background:rgba(255,255,255,.6); }
-  /* حالت «مستقر»: پنجره‌ی ارزیابی دقیقاً روی ناحیه‌ی زیر صفحه‌ی شطرنج (باکس‌های پایین) می‌نشیند */
+  /* حالت «مستقر»: پنجره‌ی ارزیابی از همان‌جایی که ناحیه‌ی زیر صفحه‌ی شطرنج
+     شروع می‌شود آغاز می‌شود، اما اگر متن تحلیل بیشتر جا لازم داشته باشد،
+     به‌جای فشرده و نامرئی شدن، به‌اندازه‌ی نیاز پایین‌تر می‌رود (با اسکرول داخلی). */
   #evalModal.eval-docked{
     max-width:none; text-align:right; display:flex; flex-direction:column; overflow:hidden;
   }
   #evalModal.eval-docked h2{ text-align:center; flex:0 0 auto; }
-  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; margin:4px 0 10px; padding-inline-end:2px; }
+  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; min-height:70px; margin:4px 0 10px; padding-inline-end:2px; }
   #evalModal.eval-docked #btnCloseEval{ flex:0 0 auto; }
   .pgn-moves{
     margin:12px 0 0; padding:10px 12px; max-height:260px; overflow:auto;
@@ -2303,7 +2305,11 @@ function renderButtons(){
   document.getElementById('btnUndo').disabled = Game.reviewMode || Game.ply===0 || Game.aiThinking || Game.animating;
   document.getElementById('btnRedo').disabled = Game.reviewMode || Game.ply>=Game.history.length-1 || Game.aiThinking || Game.animating;
   document.getElementById('btnHint').disabled = Game.reviewMode || Game.gameOver || Game.aiThinking || (Game.vsAI && currentState().turn===Game.aiColor);
-  document.getElementById('btnEval').disabled = Game.reviewMode || Game.ply===0 || Game.aiThinking || Game.animating;
+  // نکته: به‌عمد به Game.aiThinking/Game.animating وابسته نیست — چون اگر این
+  // پرچم‌ها به هر دلیلی (مثلاً یک خطای موقت) گیر کنند، نباید دکمه‌ی ارزیابی
+  // برای همیشه غیرفعال بماند. تنها شرط واقعی: حداقل یک حرکت انجام شده باشد
+  // و در حالت مرور بازی نباشیم.
+  document.getElementById('btnEval').disabled = Game.reviewMode || Game.ply===0;
 }
 
 function renderAll(){
@@ -2814,9 +2820,11 @@ document.getElementById('btnCloseEval').addEventListener('click', ()=>{ hideOver
   handle.addEventListener('pointercancel', onPointerUp);
 })();
 
-// هر بار که پنجره‌ی ارزیابی باز می‌شود، دقیقاً به اندازه‌ی ناحیه‌ی زیر
-// صفحه‌ی شطرنج (نوار وضعیت + دکمه‌های پایینی) اندازه و جاگذاری می‌شود تا
-// همان‌جا را بپوشاند و صفحه‌ی شطرنج بالای آن کاملاً دیده شود.
+// هر بار که پنجره‌ی ارزیابی باز می‌شود، از همان‌جایی که ناحیه‌ی زیر صفحه‌ی
+// شطرنج (نوار وضعیت + دکمه‌های پایینی) شروع می‌شود می‌نشیند تا همان‌جا را
+// بپوشاند. حداقل ارتفاعش به‌اندازه‌ی همان ناحیه است، اما اگر متن تحلیل به
+// جای بیشتری نیاز داشته باشد، به‌جای فشرده و نامرئی شدن، تا نزدیک پایین
+// صفحه بزرگ‌تر می‌شود (با اسکرول داخلی در صورت نیاز).
 function resetEvalModalPosition(){
   const modal = document.getElementById('evalModal');
   const boardWrap = document.getElementById('board-wrap');
@@ -2830,6 +2838,7 @@ function resetEvalModalPosition(){
     modal.style.top = '';
     modal.style.width = '';
     modal.style.height = '';
+    modal.style.maxHeight = '';
     modal.style.margin = '';
     return;
   }
@@ -2837,7 +2846,8 @@ function resetEvalModalPosition(){
   const boardRect = boardWrap.getBoundingClientRect();
   const controlsRect = controls.getBoundingClientRect();
   const top = boardRect.bottom;
-  const bottom = controlsRect.bottom;
+  const minBottom = controlsRect.bottom;
+  const viewportBottom = window.innerHeight - 8;
   const left = Math.min(boardRect.left, controlsRect.left);
   const right = Math.max(boardRect.right, controlsRect.right);
 
@@ -2847,7 +2857,9 @@ function resetEvalModalPosition(){
   modal.style.left = left + 'px';
   modal.style.top = top + 'px';
   modal.style.width = (right - left) + 'px';
-  modal.style.height = Math.max(80, bottom - top) + 'px';
+  modal.style.height = 'auto';
+  modal.style.minHeight = Math.max(80, minBottom - top) + 'px';
+  modal.style.maxHeight = Math.max(80, viewportBottom - top) + 'px';
 }
 
 function showHint(){
