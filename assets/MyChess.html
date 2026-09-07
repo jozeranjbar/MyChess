@@ -652,6 +652,9 @@
         <button data-level="5">سطح پنجم</button>
         <button data-level="6">سطح ششم</button>
         <button data-level="7">سطح هفتم</button>
+        <button data-level="8">سطح هشتم</button>
+        <button data-level="9">سطح نهم</button>
+        <button data-level="10">سطح دهم</button>
       </div>
     </div>
     <p>زمان فکر هر بازیکن را انتخاب کنید</p>
@@ -1002,15 +1005,64 @@ function applyMoveMutate(state, move){
 }
 
 // legal moves for a square: pseudo moves filtered by "does not leave own king in check"
+// بررسی سریع «آیا این حرکت پادشاه خودمان را کیش‌خورده رها می‌کند؟» بدون
+// کپی کامل صفحه (که در نسخه‌ی قبلی برای هر حرکت شبه‌قانونی انجام می‌شد و
+// بزرگ‌ترین گلوگاه سرعت موتور بود). این تابع فقط خودِ صفحه (و موقعیت شاه در
+// صورت حرکت شاه) را موقتاً تغییر می‌دهد، وضعیت کیش را می‌سنجد، و بلافاصله
+// همه‌چیز را به حالت اول برمی‌گرداند — بدون هیچ تخصیص حافظه‌ی اضافه.
+function isLegalAfterMove(state, move){
+  const board = state.board;
+  const piece = board[move.fr][move.fc];
+  const color = piece.color;
+
+  let capturedPiece = null;
+  let epR = -1, epC = -1, epPiece = null;
+  if(move.enpassant){
+    epR = move.fr; epC = move.tc;
+    epPiece = board[epR][epC];
+    board[epR][epC] = null;
+  } else {
+    capturedPiece = board[move.tr][move.tc];
+  }
+
+  board[move.tr][move.tc] = piece;
+  board[move.fr][move.fc] = null;
+
+  let rookRow=-1, rookFromCol=-1, rookToCol=-1, rookPiece=null;
+  if(move.castle==='K' || move.castle==='Q'){
+    rookRow = move.fr;
+    rookFromCol = move.castle==='K' ? 7 : 0;
+    rookToCol = move.castle==='K' ? 5 : 3;
+    rookPiece = board[rookRow][rookFromCol];
+    board[rookRow][rookToCol] = rookPiece;
+    board[rookRow][rookFromCol] = null;
+  }
+
+  const prevKingPos = piece.type==='k' ? state.kings[color] : null;
+  if(piece.type==='k') state.kings[color] = {r:move.tr, c:move.tc};
+
+  const inCheck = kingInCheck(state, color);
+
+  // بازگرداندن کامل صفحه به حالت پیش از آزمایش
+  board[move.fr][move.fc] = piece;
+  board[move.tr][move.tc] = capturedPiece;
+  if(move.enpassant) board[epR][epC] = epPiece;
+  if(rookRow!==-1){
+    board[rookRow][rookFromCol] = rookPiece;
+    board[rookRow][rookToCol] = null;
+  }
+  if(prevKingPos) state.kings[color] = prevKingPos;
+
+  return !inCheck;
+}
+
 function legalMovesFor(state, r, c){
   const piece = state.board[r][c];
   if(!piece) return [];
   const pseudo = pseudoMoves(state, r, c);
   const legal = [];
   for(const m of pseudo){
-    const test = cloneState(state);
-    applyMoveMutate(test, m);
-    if(!kingInCheck(test, piece.color)) legal.push(m);
+    if(isLegalAfterMove(state, m)) legal.push(m);
   }
   return legal;
 }
@@ -1139,9 +1191,17 @@ function evaluateBoard(state){
   return score;
 }
 
-// captures first (MVV-LVA-ish) for better alpha-beta pruning
-function orderMoves(state, moves){
+// captures first (MVV-LVA-ish) for better alpha-beta pruning; an optional
+// `preferredMove` (from the transposition table or a previous ID pass) is
+// tried first since it is very likely to be the best move here.
+function orderMoves(state, moves, preferredMove){
   return moves.slice().sort((a,b)=>{
+    if(preferredMove){
+      const aPref = a.fr===preferredMove.fr && a.fc===preferredMove.fc && a.tr===preferredMove.tr && a.tc===preferredMove.tc;
+      const bPref = b.fr===preferredMove.fr && b.fc===preferredMove.fc && b.tr===preferredMove.tr && b.tc===preferredMove.tc;
+      if(aPref && !bPref) return -1;
+      if(bPref && !aPref) return 1;
+    }
     const va = a.capture ? (ENGINE_VALUE[(state.board[a.tr][a.tc]||{type:'p'}).type] - ENGINE_VALUE[state.board[a.fr][a.fc].type]/10) : -1000;
     const vb = b.capture ? (ENGINE_VALUE[(state.board[b.tr][b.tc]||{type:'p'}).type] - ENGINE_VALUE[state.board[b.fr][b.fc].type]/10) : -1000;
     return vb - va;
@@ -1162,36 +1222,100 @@ function aiSearchCheckpoint(){
   }
 }
 
+// جدول تراپوزیشن (Transposition Table): موقعیت‌های یکسانی که از راه‌های
+// مختلفی به آن‌ها رسیده باشیم را کش می‌کند تا جست‌وجوی عمیق‌تر در همان
+// زمان ممکن شود. کلید، یک رشته‌ی فشرده از صفحه + نوبت + حقوق قلعه/آن‌پاسان است.
+let TT = new Map();
+const TT_MAX_SIZE = 2000000;
+const TT_EXACT = 0, TT_LOWER = 1, TT_UPPER = 2;
+
+function stateKey(state){
+  let s = '';
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p = state.board[r][c];
+    s += p ? (p.color + p.type) : '..';
+  }
+  s += state.turn;
+  s += state.castling.wK?'1':'0';
+  s += state.castling.wQ?'1':'0';
+  s += state.castling.bK?'1':'0';
+  s += state.castling.bQ?'1':'0';
+  s += state.ep ? ('e'+state.ep.r+state.ep.c) : 'e-';
+  return s;
+}
+
+// جست‌وجوی سکون (Quiescence Search): در انتهای عمق جست‌وجو، به‌جای برداشتن
+// یک ارزیابی ایستا در وسط یک زنجیره‌ی مهره‌خوری، فقط حرکت‌های ضربه‌ای را تا
+// آرام شدن موقعیت ادامه می‌دهد. این دقیقاً همان چیزی است که جلوی «دادن مهره
+// به‌رایگان در عمق آخر» را می‌گیرد و بزرگ‌ترین ضعف تاکتیکی موتور قبلی بود.
+function quiescence(state, alpha, beta, color, qdepth){
+  aiSearchCheckpoint();
+  const ev = evaluateBoard(state);
+  const standPat = color==='w' ? ev : -ev;
+  if(standPat >= beta) return beta;
+  if(alpha < standPat) alpha = standPat;
+  if(qdepth <= 0) return alpha;
+
+  const captures = allLegalMoves(state, color).filter(m=>m.capture || m.promotion);
+  if(!captures.length) return alpha;
+  const ordered = orderMoves(state, captures);
+  for(const m of ordered){
+    const next = cloneState(state);
+    applyMoveMutate(next, m);
+    const sc = -quiescence(next, -beta, -alpha, opp(color), qdepth-1);
+    if(sc >= beta) return beta;
+    if(sc > alpha) alpha = sc;
+  }
+  return alpha;
+}
+
 function negamax(state, depth, alpha, beta, color){
   aiSearchCheckpoint();
+  const alphaOrig = alpha;
+  const key = stateKey(state);
+  const cached = TT.get(key);
+  if(cached && cached.depth >= depth){
+    if(cached.flag === TT_EXACT) return cached.score;
+    if(cached.flag === TT_LOWER) alpha = Math.max(alpha, cached.score);
+    else if(cached.flag === TT_UPPER) beta = Math.min(beta, cached.score);
+    if(alpha >= beta) return cached.score;
+  }
+
   const moves = allLegalMoves(state, color);
   if(moves.length===0){
     if(kingInCheck(state,color)) return -99000 - depth; // checkmate: worse the sooner it happens for the mover... prefer faster mates for the winner
     return 0; // stalemate
   }
   if(depth===0){
-    const ev = evaluateBoard(state);
-    return color==='w' ? ev : -ev;
+    return quiescence(state, alpha, beta, color, 4);
   }
-  const ordered = orderMoves(state, moves);
+  const ordered = orderMoves(state, moves, cached && cached.move);
   let best = -Infinity;
+  let bestMove = null;
   for(const m of ordered){
     const next = cloneState(state);
     applyMoveMutate(next, m);
     const sc = -negamax(next, depth-1, -beta, -alpha, opp(color));
-    if(sc>best) best = sc;
+    if(sc>best){ best = sc; bestMove = m; }
     if(best>alpha) alpha = best;
     if(alpha>=beta) break;
   }
+
+  let flag = TT_EXACT;
+  if(best <= alphaOrig) flag = TT_UPPER;
+  else if(best >= beta) flag = TT_LOWER;
+  if(TT.size > TT_MAX_SIZE) TT.clear();
+  TT.set(key, { depth, score:best, flag, move:bestMove });
+
   return best;
 }
 
 // returns { move, score } — the best move for the side to move in `state`, score from its perspective
-function searchBestMove(state, depth){
+function searchBestMove(state, depth, rootHint){
   const color = state.turn;
   const moves = allLegalMoves(state, color);
   if(moves.length===0) return null;
-  const ordered = orderMoves(state, moves);
+  const ordered = orderMoves(state, moves, rootHint);
   let alpha=-Infinity, beta=Infinity;
   let bestMove = ordered[0], bestScore = -Infinity;
   for(const m of ordered){
@@ -1212,13 +1336,13 @@ function searchBestMoveTimed(state, maxDepth, timeBudgetMs){
   if(legal.length===1) return {move:legal[0], score:0, depth:1, timedOut:false};
 
   const start = performance.now();
-  const safeBudget = Math.max(180, Math.min(3200, Number(timeBudgetMs)||500));
+  const safeBudget = Math.max(180, Math.min(9000, Number(timeBudgetMs)||500));
   let best = {move:orderMoves(state, legal)[0], score:-Infinity, depth:0, timedOut:false};
 
   for(let depth=1; depth<=maxDepth; depth++){
     AI_SEARCH_CTX = { deadline:start+safeBudget, nodes:0 };
     try{
-      const result = searchBestMove(state, depth);
+      const result = searchBestMove(state, depth, best.move);
       if(result){
         best = { ...result, depth, timedOut:false, nodes:AI_SEARCH_CTX.nodes };
       }
@@ -1249,17 +1373,20 @@ function moveQualityLabel(loss){
    One chess engine, ten playing personalities.
 ========================================================= */
 const AI_LEVELS = {
-  1:  { name:'متوسط',    depth:2, randomness:0.16, blunder:0.09,  think:500,  topMoves:2, captureBias:0.90 },
-  2:  { name:'معمولی',   depth:3, randomness:0.10, blunder:0.06,  think:650,  topMoves:2, captureBias:0.94 },
-  3:  { name:'خوب',      depth:4, randomness:0.05, blunder:0.03,  think:850,  topMoves:2, captureBias:0.97 },
-  4:  { name:'قوی',      depth:5, randomness:0.02, blunder:0.012, think:1300, topMoves:1, captureBias:1.00 },
-  5:  { name:'خیلی قوی', depth:5, randomness:0.01, blunder:0.006, think:1800, topMoves:1, captureBias:1.00 },
-  6:  { name:'حرفه‌ای',  depth:6, randomness:0.004,blunder:0.0,   think:2400, topMoves:1, captureBias:1.00 },
-  7:  { name:'استاد',    depth:7, randomness:0.0,  blunder:0.0,   think:3200, topMoves:1, captureBias:1.00 }
+  1:  { name:'متوسط',       depth:2, randomness:0.16, blunder:0.09,  think:500,  topMoves:2, captureBias:0.90 },
+  2:  { name:'معمولی',      depth:3, randomness:0.10, blunder:0.06,  think:650,  topMoves:2, captureBias:0.94 },
+  3:  { name:'خوب',         depth:4, randomness:0.05, blunder:0.03,  think:850,  topMoves:2, captureBias:0.97 },
+  4:  { name:'قوی',         depth:5, randomness:0.02, blunder:0.012, think:1300, topMoves:1, captureBias:1.00 },
+  5:  { name:'خیلی قوی',    depth:6, randomness:0.01, blunder:0.006, think:2000, topMoves:1, captureBias:1.00 },
+  6:  { name:'حرفه‌ای',     depth:7, randomness:0.004,blunder:0.0,   think:2800, topMoves:1, captureBias:1.00 },
+  7:  { name:'استاد',       depth:8, randomness:0.0,  blunder:0.0,   think:3800, topMoves:1, captureBias:1.00 },
+  8:  { name:'استاد بزرگ',  depth:9, randomness:0.0,  blunder:0.0,   think:5000, topMoves:1, captureBias:1.00 },
+  9:  { name:'قهرمان',      depth:10,randomness:0.0,  blunder:0.0,   think:6500, topMoves:1, captureBias:1.00 },
+  10: { name:'جهانی',       depth:11,randomness:0.0,  blunder:0.0,   think:8000, topMoves:1, captureBias:1.00 }
 };
 
 function aiProfile(level){
-  const n = Math.max(1, Math.min(7, Number(level)||7));
+  const n = Math.max(1, Math.min(10, Number(level)||10));
   return AI_LEVELS[n];
 }
 
@@ -1375,7 +1502,7 @@ function aiThinkingDelay(level){
 }
 
 function setAILevel(level){
-  Game.aiLevel = Math.max(1, Math.min(7, Number(level)||7));
+  Game.aiLevel = Math.max(1, Math.min(10, Number(level)||10));
   document.querySelectorAll('#aiLevelGrid button').forEach(b=>
     b.classList.toggle('sel', Number(b.dataset.level)===Game.aiLevel)
   );
@@ -1386,9 +1513,9 @@ function setAILevel(level){
 function loadSavedAILevel(){
   try {
     const saved = Number(localStorage.getItem('chess_ai_level'));
-    return Number.isInteger(saved) && saved >= 1 && saved <= 7 ? saved : 7;
+    return Number.isInteger(saved) && saved >= 1 && saved <= 10 ? saved : 10;
   } catch(e) {
-    return 7;
+    return 10;
   }
 }
 
@@ -1398,7 +1525,7 @@ function resetAILevel(){ setAILevel(Game.aiLevel || loadSavedAILevel()); }
 function updatePlayerNames(){
   const blackName = document.querySelector('#barBlack .player-name');
   const whiteName = document.querySelector('#barWhite .player-name');
-  const robotName = 'ربات - سطح ' + (Game.aiLevel || 7);
+  const robotName = 'ربات - سطح ' + (Game.aiLevel || 10);
   if(blackName) blackName.textContent = Game.vsAI && Game.aiColor === 'b' ? robotName : 'بازیکن سیاه';
   if(whiteName) whiteName.textContent = Game.vsAI && Game.aiColor === 'w' ? robotName : 'بازیکن سفید';
 }
@@ -1473,7 +1600,7 @@ function saveLastGame(){
       vsAI: !!Game.vsAI,
       humanColor: Game.humanColor || 'w',
       aiColor: Game.aiColor || 'b',
-      aiLevel: Game.aiLevel || 7,
+      aiLevel: Game.aiLevel || 10,
       boardFlipped: !!Game.boardFlipped,
       history: Game.history.map(encodeState),
       moveLog: Game.moveLog,
@@ -1498,7 +1625,7 @@ function loadLastGame(){
     Game.vsAI = !!data.vsAI;
     Game.humanColor = data.humanColor==='b' ? 'b' : 'w';
     Game.aiColor = data.aiColor==='w' ? 'w' : 'b';
-    Game.aiLevel = Math.max(1, Math.min(7, Number(data.aiLevel)||7));
+    Game.aiLevel = Math.max(1, Math.min(10, Number(data.aiLevel)||10));
     Game.boardFlipped = !!data.boardFlipped;
     Game.history = data.version===2 ? data.history.map(decodeState) : data.history;
     Game.moveLog = Array.isArray(data.moveLog) ? data.moveLog : [];
@@ -1564,7 +1691,7 @@ const Game = {
   humanColor: 'w',   // the human side in robot mode
   aiColor: 'b',       // the robot side in robot mode
   aiThinking: false,
-  aiLevel: 7
+  aiLevel: 10
 };
 
 function currentState(){ return Game.history[Game.ply]; }
