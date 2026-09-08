@@ -113,11 +113,13 @@
   body.mode-ai.ai-human-white #app > .controls{ order:9; }
   .player-info{ display:flex; align-items:center; gap:8px; min-width:0; flex:1;}
   .swatch{ width:22px; height:22px; border-radius:50%; flex-shrink:0; border:2px solid var(--gold-dim); background-size:cover;}
-  .swatch.w{ background: radial-gradient(circle at 35% 30%, #fbf3df, #cbb98d 70%, #9c8a63); }
-  .swatch.b{ background: radial-gradient(circle at 35% 30%, #8a6a45, #4a3520 70%, #285050); }
-  .player-name{ font-size:19.5px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .swatch.w{ background:#FFFFFF; }
+  .swatch.b{ background:#000000; }
+  .player-name{ font-size:19.5px; color:#123C82; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .turn-tag{ font-size:18px; font-weight:700; color:#D4AF37; opacity:0; transition:opacity .2s;}
   .playerbar.active .turn-tag{ opacity:1;}
+  /* شمارهٔ حرکت و آخرین حرکت هر بازیکن، زیر نام او، شبیه نوشتار PGN */
+  .last-move{ font-size:12px; color:var(--cream-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; text-align:right; unicode-bidi:plaintext; min-height:14px; }
   .clock{
     font-variant-numeric: tabular-nums;
     font-size:29.9px; font-weight:600; letter-spacing:1px;
@@ -126,15 +128,15 @@
     min-width:83.2px; text-align:center;
   }
   .playerbar.active .clock{
-    color:#5A3A42;
-    background:#FCEEF2;
-    border-color:#F3C9D4;
+    color:#5A4A20;
+    background:#FDF3B0;
+    border-color:#E9D77A;
   }
   .clock.low{ color:#F0A08F !important; }
   .playerbar.active .clock.low{
-    background:#FCEEF2;
-    color:#5A3A42 !important;
-    border-color:#F3C9D4;
+    background:#FDF3B0;
+    color:#5A4A20 !important;
+    border-color:#E9D77A;
   }
 
   /* ===== captured pieces strip ===== */
@@ -146,7 +148,7 @@
   }
   .capstrip .caps{ display:flex; flex-wrap:wrap; gap:2px; align-items:center; }
   .capstrip .cap-icon{ width:16px; height:16px; border-radius:50%; background-size:600% 200%; opacity:.9; filter:saturate(.8);}
-  .capstrip .adv{ font-weight:800; margin-inline-start:6px; font-size:13px; white-space:nowrap; }
+  .capstrip .adv{ font-weight:800; margin-inline-start:6px; font-size:14px; white-space:nowrap; direction:ltr; unicode-bidi:plaintext; }
   /* متن اختلاف امتیاز هم‌رنگ مهرهٔ همان بازیکن است، با سایه برای خوانایی */
   .capstrip .adv.black{ color:#151515; text-shadow:0 1px 0 rgba(255,255,255,.45); }
   .capstrip .adv.white{ color:#F7F3E8; text-shadow:0 1px 2px rgba(0,0,0,.75); }
@@ -292,6 +294,11 @@
     box-sizing:border-box; padding:0 2px;
     margin-top:-1px;
     touch-action:manipulation;
+    /* اندازهٔ نوشته‌های داخل دکمه‌ها بر مبنای عرض همین نوار (و در نتیجه بزرگی
+       واقعی هر مستطیل، چون هر دکمه سهم مساوی از این عرض را دارد) تنظیم می‌شود
+       تا در هیچ اندازه‌ای از صفحهٔ گوشی، نوشته از مستطیل دکمه بیرون نزند. */
+    container-type: inline-size;
+    container-name: ctlbar;
   }
   button.ctl{
     flex:1 1 0; min-width:0; width:0;
@@ -308,6 +315,14 @@
     -webkit-touch-callout:none;
     min-height:50px;
     height:50px;
+  }
+  /* مقیاس‌پذیری پیوسته: هرچه عرض نوار دکمه‌ها (و در نتیجه هر مستطیل) بزرگ‌تر
+     یا کوچک‌تر باشد، فونت هم به همان نسبت بزرگ یا کوچک می‌شود. در مرورگرهایی
+     که واحد cqw را پشتیبانی نکنند، این قانون نادیده گرفته می‌شود و رسانه‌های
+     پایین‌تر (max-width) به‌عنوان جایگزین اعمال می‌مانند. */
+  @container ctlbar (min-width: 0px){
+    button.ctl{ font-size: clamp(9px, 3.6cqw, 14px); }
+    button.ctl .ic{ font-size: clamp(12px, 4.6cqw, 16px); }
   }
   /* لمس پایدارتر روی موبایل: هر دکمه یک ناحیهٔ مستقل و مشخص دارد. */
   .controls button.ctl{
@@ -351,21 +366,17 @@
   .modal p{ color:var(--cream-dim); font-size:13px; margin:4px 0 18px;}
   .modal .row-btns{ display:flex; gap:10px; }
   .modal .row-btns button{ flex:1; }
-  /* دستگیره‌ی کوچک برای جابه‌جا کردن پنجره‌ی ارزیابی روی صفحه */
+  /* پنجره‌ی ارزیابی دیگر قابل جابه‌جایی نیست: همیشه در انتهای صفحه‌ی شطرنج باز می‌شود. */
   #evalModal{ position:relative; }
-  .drag-handle{
-    width:46px; height:5px; border-radius:3px; background:rgba(255,255,255,.35);
-    margin:-8px auto 14px; cursor:grab; touch-action:none; flex:0 0 auto;
-  }
-  .drag-handle:active{ cursor:grabbing; background:rgba(255,255,255,.6); }
   /* حالت «مستقر»: پنجره‌ی ارزیابی از همان‌جایی که ناحیه‌ی زیر صفحه‌ی شطرنج
      شروع می‌شود آغاز می‌شود، اما اگر متن تحلیل بیشتر جا لازم داشته باشد،
-     به‌جای فشرده و نامرئی شدن، به‌اندازه‌ی نیاز پایین‌تر می‌رود (با اسکرول داخلی). */
+     به‌جای فشرده و نامرئی شدن، به‌اندازه‌ی نیاز پایین‌تر می‌رود (با اسکرول داخلی
+     تا در گوشی‌های با صفحهٔ کوچک هم قابل خواندن باشد). */
   #evalModal.eval-docked{
     max-width:none; text-align:right; display:flex; flex-direction:column; overflow:hidden;
   }
-  #evalModal.eval-docked h2{ text-align:center; flex:0 0 auto; }
-  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; min-height:70px; margin:4px 0 10px; padding-inline-end:2px; }
+  /* متن ارزیابی از بالاترین ردیف پنجره شروع می‌شود (بدون عنوان بالای آن). */
+  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; min-height:70px; margin:0 0 10px; padding-inline-end:2px; }
   #evalModal.eval-docked #btnCloseEval{ flex:0 0 auto; }
   .pgn-moves{
     margin:12px 0 0; padding:10px 12px; max-height:260px; overflow:auto;
@@ -549,6 +560,7 @@
       <div>
         <div class="player-name">بازیکن سیاه</div>
         <div class="turn-tag">نوبت</div>
+        <div class="last-move" id="lastMoveBlack"></div>
       </div>
     </div>
     <button class="fullscreen-inline" id="fsBtn" title="تمام‌صفحه" aria-label="تمام‌صفحه">⛶</button>
@@ -573,6 +585,7 @@
       <div>
         <div class="player-name">بازیکن سفید</div>
         <div class="turn-tag">نوبت</div>
+        <div class="last-move" id="lastMoveWhite"></div>
       </div>
     </div>
     <div class="clock" id="clockWhite">10:00</div>
@@ -682,10 +695,20 @@
 <!-- Move evaluation modal -->
 <div class="overlay hidden" id="evalOverlay" style="background:transparent; pointer-events:none;">
   <div class="modal" id="evalModal" style="pointer-events:auto;">
-    <div class="drag-handle" id="evalDragHandle" title="برای جابه‌جایی این پنجره را بکشید"></div>
-    <h2 id="evalTitle">ارزیابی حرکت</h2>
     <p id="evalDesc" style="line-height:1.9;"></p>
     <button class="btn-big gold" id="btnCloseEval" style="width:100%;">بستن</button>
+  </div>
+</div>
+
+<!-- Cancel current game confirmation modal -->
+<div class="overlay hidden" id="cancelGameOverlay">
+  <div class="modal">
+    <h2 style="margin-bottom:10px;">تغییر حالت بازی</h2>
+    <p style="margin-bottom:18px;">آیا می‌خواهید این بازی را کنسل کنید؟</p>
+    <div class="row-btns">
+      <button class="btn-big gold" id="btnConfirmCancelGame">بله</button>
+      <button class="btn-big" id="btnDismissCancelGame">خیر</button>
+    </div>
   </div>
 </div>
 
@@ -1495,12 +1518,6 @@ function chooseAIResult(state, level){
   return {move:chosen.move,score:chosen.score,profile};
 }
 
-function aiThinkingDelay(level){
-  const p = aiProfile(level);
-  const jitter = p.think > 300 ? Math.floor(Math.random()*180) : Math.floor(Math.random()*100);
-  return p.think + jitter;
-}
-
 function setAILevel(level){
   Game.aiLevel = Math.max(1, Math.min(10, Number(level)||10));
   document.querySelectorAll('#aiLevelGrid button').forEach(b=>
@@ -2094,10 +2111,11 @@ function maybeTriggerAIMove(){
   const state = currentState();
   if(state.turn !== Game.aiColor) return;
   const level = Game.aiLevel || 1;
-  const profile = aiProfile(level);
   Game.aiThinking = true;
   renderStatus();
   renderButtons();
+  // بدون تأخیر ساختگی: فقط یک تیک کوتاه تا وضعیت «در حال فکر کردن» رندر شود،
+  // سپس محاسبه بلافاصله با زمان واقعی خودش اجرا می‌شود (بدون افزودن تأخیر مصنوعی).
   setTimeout(()=>{
     if(!Game.vsAI || Game.gameOver || Game.reviewMode){ Game.aiThinking=false; renderButtons(); return; }
     const state2 = currentState();
@@ -2116,7 +2134,7 @@ function maybeTriggerAIMove(){
     Game.aiThinking = false;
     if(result) doMove(result.move);
     else renderButtons();
-  }, aiThinkingDelay(level));
+  }, 0);
 }
 
 function buildMoveText(state, move){
@@ -2402,16 +2420,35 @@ function renderCaptured(){
   advWhiteEl.textContent = '';
 
   const faNum = n => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  // فقط عدد اختلاف امتیاز، همراه با علامت + یا -، کنار مهره‌های زده‌شده نشان داده می‌شود.
   if(diff > 0){
     // سفید مهرهٔ بیشتری گرفته، پس سیاه عقب است و سفید جلو.
-    advBlackEl.textContent = `شما ${faNum(diff)} امتیاز عقب هستید`;
-    advWhiteEl.textContent = `شما ${faNum(diff)} امتیاز جلو هستید`;
+    advBlackEl.textContent = `${faNum(diff)}-`;
+    advWhiteEl.textContent = `${faNum(diff)}+`;
   } else if(diff < 0){
     const d = -diff;
     // سیاه مهرهٔ بیشتری گرفته، پس سیاه جلو است و سفید عقب.
-    advBlackEl.textContent = `شما ${faNum(d)} امتیاز جلو هستید`;
-    advWhiteEl.textContent = `شما ${faNum(d)} امتیاز عقب هستید`;
+    advBlackEl.textContent = `${faNum(d)}+`;
+    advWhiteEl.textContent = `${faNum(d)}-`;
   }
+}
+
+// زیر نام هر بازیکن، شمارهٔ حرکت و آخرین حرکتِ خودِ او را شبیه نوشتار PGN نشان می‌دهد.
+function renderLastMoves(){
+  const wEl = document.getElementById('lastMoveWhite');
+  const bEl = document.getElementById('lastMoveBlack');
+  if(!wEl || !bEl) return;
+  const log = Game.reviewMode ? Game.moveLog.slice(0, Game.reviewPly) : Game.moveLog.slice(0, Game.ply);
+  let wText = '', bText = '';
+  for(let i=log.length-1; i>=0; i--){
+    const mv = log[i];
+    const moveNumber = Math.floor(i/2)+1;
+    if(mv.color==='w' && !wText) wText = `${moveNumber}. ${mv.san}`;
+    if(mv.color==='b' && !bText) bText = `${moveNumber}...${mv.san}`;
+    if(wText && bText) break;
+  }
+  wEl.textContent = wText;
+  bEl.textContent = bText;
 }
 
 function renderStatus(){
@@ -2443,6 +2480,7 @@ function renderAll(){
   renderBoard();
   renderClocks();
   renderCaptured();
+  renderLastMoves();
   renderStatus();
   renderButtons();
 }
@@ -2847,8 +2885,32 @@ function setMode(vsAI){
     startNewGame(Game.timeMinutes || 10, null);
   }
 }
-safeControlTap(document.getElementById('btnMode2P'), ()=>setMode(false));
-safeControlTap(document.getElementById('btnModeAI'), ()=>setMode(true));
+// اگر بازی در حال انجام باشد، قبل از تعویض حالت (دو نفره / با ربات) از کاربر
+// تأیید می‌گیریم که آیا واقعاً می‌خواهد بازی جاری را کنسل کند یا نه.
+let pendingModeChange = null;
+function isGameInProgress(){
+  return !Game.reviewMode && !Game.gameOver && Game.ply > 0;
+}
+function requestModeChange(vsAI){
+  if(Game.vsAI === vsAI) return; // از قبل همین حالت فعال است
+  if(isGameInProgress()){
+    pendingModeChange = vsAI;
+    showOverlay('cancelGameOverlay');
+  } else {
+    setMode(vsAI);
+  }
+}
+document.getElementById('btnConfirmCancelGame').addEventListener('click', ()=>{
+  hideOverlay('cancelGameOverlay');
+  if(pendingModeChange !== null){ setMode(pendingModeChange); pendingModeChange = null; }
+});
+document.getElementById('btnDismissCancelGame').addEventListener('click', ()=>{
+  hideOverlay('cancelGameOverlay');
+  pendingModeChange = null;
+});
+
+safeControlTap(document.getElementById('btnMode2P'), ()=>requestModeChange(false));
+safeControlTap(document.getElementById('btnModeAI'), ()=>requestModeChange(true));
 
 safeControlTap(document.getElementById('btnHint'), showHint);
 safeControlTap(document.getElementById('btnEval'), ()=>{
@@ -2901,51 +2963,6 @@ document.getElementById('btnFirstRunAI').addEventListener('click', ()=>{
 });
 
 document.getElementById('btnCloseEval').addEventListener('click', ()=>{ hideOverlay('evalOverlay'); });
-
-// امکان جابه‌جا کردن (درگ کردن) پنجره‌ی ارزیابی در هر جهت،
-// تا کاربر بتواند هم‌زمان صفحه‌ی شطرنج زیرِ آن را ببیند.
-(function initEvalDrag(){
-  const modal = document.getElementById('evalModal');
-  const handle = document.getElementById('evalDragHandle');
-  if(!modal || !handle) return;
-  let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
-
-  function onPointerDown(e){
-    dragging = true;
-    const rect = modal.getBoundingClientRect();
-    // از حالت وسط‌چین‌شده با flex به مختصات ثابت تبدیل می‌شود تا بتوان آزادانه جابه‌جا کرد
-    modal.style.position = 'fixed';
-    modal.style.margin = '0';
-    modal.style.left = rect.left + 'px';
-    modal.style.top = rect.top + 'px';
-    startLeft = rect.left;
-    startTop = rect.top;
-    startX = e.clientX;
-    startY = e.clientY;
-    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
-    e.preventDefault();
-  }
-  function onPointerMove(e){
-    if(!dragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    const rect = modal.getBoundingClientRect();
-    const maxLeft = window.innerWidth - rect.width - 4;
-    const maxTop = window.innerHeight - rect.height - 4;
-    const newLeft = Math.max(4, Math.min(maxLeft, startLeft + dx));
-    const newTop = Math.max(4, Math.min(maxTop, startTop + dy));
-    modal.style.left = newLeft + 'px';
-    modal.style.top = newTop + 'px';
-  }
-  function onPointerUp(e){
-    dragging = false;
-    try{ handle.releasePointerCapture(e.pointerId); }catch(err){}
-  }
-  handle.addEventListener('pointerdown', onPointerDown);
-  handle.addEventListener('pointermove', onPointerMove);
-  handle.addEventListener('pointerup', onPointerUp);
-  handle.addEventListener('pointercancel', onPointerUp);
-})();
 
 // هر بار که پنجره‌ی ارزیابی باز می‌شود، از همان‌جایی که ناحیه‌ی زیر صفحه‌ی
 // شطرنج (نوار وضعیت + دکمه‌های پایینی) شروع می‌شود می‌نشیند تا همان‌جا را
@@ -3068,13 +3085,10 @@ function analyzeHalfMove(idx){
 
 function showLastMoveEvaluation(){
   if(Game.reviewMode) return;
-  const evalTitleEl = document.getElementById('evalTitle');
   const evalDescEl = document.getElementById('evalDesc');
   try{ resetEvalModalPosition(); }catch(e){ /* اگر اندازه‌گیری صفحه با خطا مواجه شد، بازهم ادامه بده */ }
 
   if(Game.ply===0){
-    evalTitleEl.textContent = 'ارزیابی حرکت';
-    evalTitleEl.style.color = 'var(--gold)';
     evalDescEl.innerHTML = 'هنوز حرکتی انجام نشده است.';
     showOverlay('evalOverlay');
     return;
@@ -3086,8 +3100,6 @@ function showLastMoveEvaluation(){
   const indices = [];
   for(let i=startIdx; i<=lastIdx; i++) indices.push(i);
 
-  evalTitleEl.textContent = indices.length>1 ? 'ارزیابی دو حرکت آخر' : 'ارزیابی حرکت';
-  evalTitleEl.style.color = 'var(--gold)';
   evalDescEl.innerHTML = 'در حال تحلیل دقیق حرکت‌ها...';
   showOverlay('evalOverlay');
 
@@ -3103,8 +3115,7 @@ function showLastMoveEvaluation(){
           ? (r.pawnsAfterWhite>0 ? 'مات به نفع سفید' : 'مات به نفع سیاه')
           : (r.pawnsAfterWhite>0?'+':'') + r.pawnsAfterWhite.toFixed(2);
         html += `<div style="${i>0?'margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.15);':''}">`;
-        html += `<div style="font-weight:bold; margin-bottom:4px;">حرکت ${r.moveNumber} (${colorLabel}): <span style="color:var(--cream)">${r.playedSan}</span> — <span style="color:${r.q.color}">${r.q.text}</span></div>`;
-        html += `<div style="font-size:0.92em; opacity:0.9; margin-bottom:2px;">افت ارزیابی نسبت به بهترین حرکت ممکن: <b>${(r.loss/100).toFixed(2)}</b> پیاده</div>`;
+        html += `<div style="font-weight:bold; margin-bottom:4px;">حرکت ${r.moveNumber} (${colorLabel}): <span style="color:var(--cream)">${r.playedSan}</span></div>`;
         if(r.bestSan && r.bestSan!==r.playedSan && r.loss>15){
           html += `<div style="font-size:0.92em; margin-bottom:2px;">حرکت بهتر بود: <b style="color:var(--gold)">${r.bestSan}</b></div>`;
           if(r.alternatives.length){
