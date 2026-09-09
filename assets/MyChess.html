@@ -2958,7 +2958,10 @@ safeControlTap(document.getElementById('btnEval'), ()=>{
   }
 });
 
-// لمس مستقیم دو دکمهٔ انتهایی روی بعضی گوشی‌ها که click را ناپایدار ارسال می‌کنند.
+// لمس مستقیم دکمهٔ «چرخاندن صفحه» روی بعضی گوشی‌ها که click را ناپایدار ارسال می‌کنند.
+// (دکمهٔ «ارزیابی» عمداً فقط از مسیر ساده‌ی click بالا استفاده می‌کند، دقیقاً مثل دکمهٔ
+// «راهنمایی»؛ داشتن هم‌زمان دو مسیر click و pointerup باعث رفتار ناپایدار روی بعضی
+// مرورگرهای موبایل می‌شد — گاهی نیاز به چند بار زدن یا نگه‌داشتن لمس بود.)
 function safePointerTap(el, action){
   if(!el) return;
   el.addEventListener('pointerup', (e)=>{
@@ -2972,14 +2975,6 @@ function safePointerTap(el, action){
     action(e);
   }, {passive:false});
 }
-safePointerTap(document.getElementById('btnEval'), ()=>{
-  try{ showLastMoveEvaluation(); }
-  catch(err){
-    const d = document.getElementById('evalDesc');
-    if(d) d.innerHTML = 'خطا: ' + (err && err.message ? err.message : String(err));
-    showOverlay('evalOverlay');
-  }
-});
 safePointerTap(document.getElementById('btnFlip'), ()=>{
   if(Game.animating || Game.reviewMode) return;
   Game.boardFlipped = !Game.boardFlipped;
