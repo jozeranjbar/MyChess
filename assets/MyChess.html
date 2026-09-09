@@ -355,6 +355,13 @@
   .modal p{ color:var(--cream-dim); font-size:13px; margin:4px 0 18px;}
   .modal .row-btns{ display:flex; gap:10px; }
   .modal .row-btns button{ flex:1; }
+  /* صفحه‌ی خوش‌آمدگویی متن بلندی دارد، پس باید بتوان آن را اسکرول کرد */
+  #firstRunOverlay{ align-items:flex-start; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:22px 16px; }
+  #firstRunOverlay .modal{ max-width:420px; margin:auto 0; }
+  .welcome-features{
+    text-align:right; direction:rtl; unicode-bidi:plaintext;
+    color:var(--cream-dim); font-size:13.5px; line-height:2.1;
+  }
   #evalModal{ position:relative; }
   /* حالت «مستقر»: پنجره‌ی ارزیابی از همان‌جایی که ناحیه‌ی زیر صفحه‌ی شطرنج
      شروع می‌شود آغاز می‌شود، اما اگر متن تحلیل بیشتر جا لازم داشته باشد،
@@ -481,8 +488,9 @@
   font-size:12px;
   color:#3F5F4D;
   margin:0 0 10px;
-  line-height:1.4;
+  line-height:1.6;
   direction:rtl;
+  unicode-bidi:plaintext;
 }
 #setupOverlay .modal h2{
   color:#285050;
@@ -624,8 +632,16 @@
 <!-- Setup modal -->
 <div class="overlay hidden" id="firstRunOverlay">
   <div class="modal" style="text-align:center;">
-    <h2 style="margin-bottom:10px;">به MyChess خوش آمدید</h2>
-    <p style="margin-bottom:18px;">می‌خواهید چطور بازی کنید؟</p>
+    <div class="welcome-features">♟️ از ویژگی‌های برنامه MyChess :<br>
+۱ - تنها شطرنج آنلاینی که میشود دو نفر روبروی هم بنشینند و بازی کنند و مهره ها را بدون چرخاندن صفحه ، خوب و یکسان ببینند.<br>
+۲- قبل از حرکت ، میتوان راهنمایی گرفت و بعد از حرکت میتوان ارزیابی حرکت خود و حریف را از دید موتور برنامه نگاه کرد.<br>
+۳_ امکان بازگشت و بررسی حرکات ، با عقب و جلو بردن آنها.<br>
+۴- امکان کپی بازی و ادامه آن برای بعد یا انتقال آن بر روی نرم‌افزارهای دیگر شطرنج.<br>
+۵- امکان افزودن بازیهای دیگر از هر جایی به این برنامه و تحلیل و بررسی آن توسط خود برنامه و یا ادامه آن بازیها.<br>
+۶- ارتباط با ما و آپدیت منظم برنامه در کانال تلگرامی واژه‌ها<br>
+ranjberan@gmail.com<br>
+@wajehha</div>
+    <p style="margin:14px 0 18px;">می‌خواهید چطور بازی کنید؟</p>
     <div class="row-btns">
       <button class="btn-big" id="btnFirstRun2P">شطرنج دو نفره</button>
       <button class="btn-big gold" id="btnFirstRunAI">شطرنج با ربات</button>
@@ -636,7 +652,7 @@
 <div class="overlay hidden" id="setupOverlay">
   <div class="modal">
     <h2>بازی جدید</h2>
-    <div class="setup-update-note">آپدیت برنامه در کانال تلگرامی واژه‌ها  wajehha@</div>
+    <div class="setup-update-note">ارتباط با ما و آپدیت منظم برنامه در کانال تلگرامی واژه‌ها<br>ranjberan@gmail.com ، @wajehha</div>
     <div id="aiColorChooser" style="display:none;">
       <p style="margin-bottom:10px;">با کدام مهره می‌خواهید بازی کنید؟</p>
       <div class="setup-grid" id="colorGrid" style="margin-bottom:14px;">
