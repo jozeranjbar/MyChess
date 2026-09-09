@@ -113,9 +113,10 @@
   body.mode-ai.ai-human-white #app > .controls{ order:9; }
   .player-info{ display:flex; align-items:center; gap:8px; min-width:0; flex:1;}
   .swatch{ width:22px; height:22px; border-radius:50%; flex-shrink:0; border:2px solid var(--gold-dim); background-size:cover;}
-  .swatch.w{ background: radial-gradient(circle at 35% 30%, #fbf3df, #cbb98d 70%, #9c8a63); }
-  .swatch.b{ background: radial-gradient(circle at 35% 30%, #8a6a45, #4a3520 70%, #285050); }
-  .player-name{ font-size:19.5px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* دایرهٔ کنار نام هر بازیکن دقیقاً هم‌رنگ مهرهٔ همان بازیکن است: سفید یا سیاه. */
+  .swatch.w{ background:#FFFFFF; box-shadow:inset 0 -2px 4px rgba(0,0,0,.22), inset 0 2px 3px rgba(255,255,255,.9); }
+  .swatch.b{ background:#101010; box-shadow:inset 0 -2px 4px rgba(0,0,0,.65), inset 0 2px 3px rgba(255,255,255,.10); }
+  .player-name{ font-size:19.5px; color:#F5B9CF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .turn-tag{ font-size:18px; font-weight:700; color:#D4AF37; opacity:0; transition:opacity .2s;}
   .playerbar.active .turn-tag{ opacity:1;}
   .clock{
@@ -126,15 +127,15 @@
     min-width:83.2px; text-align:center;
   }
   .playerbar.active .clock{
-    color:#5A3A42;
-    background:#FCEEF2;
-    border-color:#F3C9D4;
+    color:#5A4A1E;
+    background:#FFF3C4;
+    border-color:#E9D48A;
   }
   .clock.low{ color:#F0A08F !important; }
   .playerbar.active .clock.low{
-    background:#FCEEF2;
-    color:#5A3A42 !important;
-    border-color:#F3C9D4;
+    background:#FFF3C4;
+    color:#A5391F !important;
+    border-color:#E9D48A;
   }
 
   /* ===== captured pieces strip ===== */
@@ -297,7 +298,10 @@
     flex:1 1 0; min-width:0; width:0;
     background:linear-gradient(180deg,#2B5659,#173C3E);
     border:1px solid var(--panel-border); color:var(--cream);
-    padding:4px 2px; border-radius:8px; font-size:14px;
+    padding:4px 2px; border-radius:8px;
+    /* اندازهٔ فونت با عرض صفحه هماهنگ می‌شود تا در گوشی‌های خیلی کوچک یا خیلی بزرگ
+       هرگز از چارچوب دکمه بیرون نزند. */
+    font-size:clamp(9px, 2.6vw, 14px);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:1px; cursor:pointer; font-family:inherit;
     position:relative; z-index:21;
@@ -308,6 +312,7 @@
     -webkit-touch-callout:none;
     min-height:50px;
     height:50px;
+    overflow:hidden;
   }
   /* لمس پایدارتر روی موبایل: هر دکمه یک ناحیهٔ مستقل و مشخص دارد. */
   .controls button.ctl{
@@ -321,10 +326,10 @@
     pointer-events:auto; touch-action:manipulation;
   }
 
-  button.ctl .ic{ font-size:16px; line-height:1; pointer-events:none; }
+  button.ctl .ic{ font-size:clamp(12px, 3.4vw, 17px); line-height:1; pointer-events:none; flex-shrink:0; }
   button.ctl:active{ transform:scale(.96); }
   button.ctl:disabled{ opacity:.35; }
-  button.ctl .ic{ font-size:16px; }
+  button.ctl .lbl{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
   button.ctl.primary{ background:linear-gradient(180deg,#579078,#477F69); color:#F0F0E8; border-color:var(--gold); font-weight:700;}
   button.ctl.danger{ border-color:#74433B; color:#F0B0A3;}
 
@@ -581,12 +586,12 @@
   <div class="status-line" id="statusLine"></div>
 
   <div class="controls">
-    <button class="ctl" id="btnUndo"><span class="ic">↺</span>Undo</button>
-    <button class="ctl" id="btnRedo"><span class="ic">↻</span>Redo</button>
-    <button class="ctl" id="btnPgn"><span class="ic">📄</span>PGN</button>
-    <button class="ctl" id="btnHint"><span class="ic">💡</span>راهنمایی</button>
-    <button class="ctl" id="btnEval"><span class="ic">★</span>ارزیابی</button>
-    <button class="ctl" id="btnFlip"><span class="ic">⟳</span>چرخاندن صفحه</button>
+    <button class="ctl" id="btnUndo"><span class="ic">↺</span><span class="lbl">Undo</span></button>
+    <button class="ctl" id="btnRedo"><span class="ic">↻</span><span class="lbl">Redo</span></button>
+    <button class="ctl" id="btnPgn"><span class="ic">📄</span><span class="lbl">PGN</span></button>
+    <button class="ctl" id="btnHint"><span class="ic">💡</span><span class="lbl">راهنمایی</span></button>
+    <button class="ctl" id="btnEval"><span class="ic">★</span><span class="lbl">ارزیابی</span></button>
+    <button class="ctl" id="btnFlip"><span class="ic">⟳</span><span class="lbl">چرخاندن صفحه</span></button>
   </div>
 
 
@@ -690,6 +695,17 @@
 </div>
 
 <!-- End game modal -->
+<div class="overlay hidden" id="cancelGameOverlay">
+  <div class="modal">
+    <h2>کنسل کردن بازی</h2>
+    <p>آیا می‌خواهید این بازی را کنسل کنید؟</p>
+    <div class="row-btns">
+      <button class="btn-big gold" id="btnCancelGameYes">بله</button>
+      <button class="btn-big" id="btnCancelGameNo">خیر</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="endOverlay">
   <div class="modal">
     <h2 id="endTitle">پایان بازی</h2>
@@ -2888,8 +2904,32 @@ function setMode(vsAI){
     startNewGame(Game.timeMinutes || 10, null);
   }
 }
-safeControlTap(document.getElementById('btnMode2P'), ()=>setMode(false));
-safeControlTap(document.getElementById('btnModeAI'), ()=>setMode(true));
+// اگر بازی در حال انجام باشد (حداقل یک حرکت زده شده و بازی تمام نشده)، قبل از
+// شروع بازیِ جدید/تغییر حالت، از کاربر تأیید گرفته می‌شود.
+function isGameInProgress(){
+  return Game.history && Game.history.length > 1 && !Game.gameOver;
+}
+let pendingModeSwitch = null;
+function requestModeSwitch(vsAI){
+  if(isGameInProgress()){
+    pendingModeSwitch = vsAI;
+    showOverlay('cancelGameOverlay');
+  } else {
+    setMode(vsAI);
+  }
+}
+safeControlTap(document.getElementById('btnMode2P'), ()=>requestModeSwitch(false));
+safeControlTap(document.getElementById('btnModeAI'), ()=>requestModeSwitch(true));
+safeControlTap(document.getElementById('btnCancelGameYes'), ()=>{
+  hideOverlay('cancelGameOverlay');
+  const vsAI = pendingModeSwitch;
+  pendingModeSwitch = null;
+  if(vsAI !== null) setMode(vsAI);
+});
+safeControlTap(document.getElementById('btnCancelGameNo'), ()=>{
+  pendingModeSwitch = null;
+  hideOverlay('cancelGameOverlay');
+});
 
 safeControlTap(document.getElementById('btnHint'), showHint);
 safeControlTap(document.getElementById('btnEval'), ()=>{
