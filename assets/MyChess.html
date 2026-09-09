@@ -113,13 +113,11 @@
   body.mode-ai.ai-human-white #app > .controls{ order:9; }
   .player-info{ display:flex; align-items:center; gap:8px; min-width:0; flex:1;}
   .swatch{ width:22px; height:22px; border-radius:50%; flex-shrink:0; border:2px solid var(--gold-dim); background-size:cover;}
-  .swatch.w{ background:#FFFFFF; }
-  .swatch.b{ background:#000000; }
-  .player-name{ font-size:19.5px; color:#123C82; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .swatch.w{ background: radial-gradient(circle at 35% 30%, #fbf3df, #cbb98d 70%, #9c8a63); }
+  .swatch.b{ background: radial-gradient(circle at 35% 30%, #8a6a45, #4a3520 70%, #285050); }
+  .player-name{ font-size:19.5px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .turn-tag{ font-size:18px; font-weight:700; color:#D4AF37; opacity:0; transition:opacity .2s;}
   .playerbar.active .turn-tag{ opacity:1;}
-  /* شمارهٔ حرکت و آخرین حرکت هر بازیکن، زیر نام او، شبیه نوشتار PGN */
-  .last-move{ font-size:12px; color:var(--cream-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; text-align:right; unicode-bidi:plaintext; min-height:14px; }
   .clock{
     font-variant-numeric: tabular-nums;
     font-size:29.9px; font-weight:600; letter-spacing:1px;
@@ -128,15 +126,15 @@
     min-width:83.2px; text-align:center;
   }
   .playerbar.active .clock{
-    color:#5A4A20;
-    background:#FDF3B0;
-    border-color:#E9D77A;
+    color:#5A3A42;
+    background:#FCEEF2;
+    border-color:#F3C9D4;
   }
   .clock.low{ color:#F0A08F !important; }
   .playerbar.active .clock.low{
-    background:#FDF3B0;
-    color:#5A4A20 !important;
-    border-color:#E9D77A;
+    background:#FCEEF2;
+    color:#5A3A42 !important;
+    border-color:#F3C9D4;
   }
 
   /* ===== captured pieces strip ===== */
@@ -148,7 +146,7 @@
   }
   .capstrip .caps{ display:flex; flex-wrap:wrap; gap:2px; align-items:center; }
   .capstrip .cap-icon{ width:16px; height:16px; border-radius:50%; background-size:600% 200%; opacity:.9; filter:saturate(.8);}
-  .capstrip .adv{ font-weight:800; margin-inline-start:6px; font-size:14px; white-space:nowrap; direction:ltr; unicode-bidi:plaintext; }
+  .capstrip .adv{ font-weight:800; margin-inline-start:6px; font-size:13px; white-space:nowrap; }
   /* متن اختلاف امتیاز هم‌رنگ مهرهٔ همان بازیکن است، با سایه برای خوانایی */
   .capstrip .adv.black{ color:#151515; text-shadow:0 1px 0 rgba(255,255,255,.45); }
   .capstrip .adv.white{ color:#F7F3E8; text-shadow:0 1px 2px rgba(0,0,0,.75); }
@@ -294,11 +292,6 @@
     box-sizing:border-box; padding:0 2px;
     margin-top:-1px;
     touch-action:manipulation;
-    /* اندازهٔ نوشته‌های داخل دکمه‌ها بر مبنای عرض همین نوار (و در نتیجه بزرگی
-       واقعی هر مستطیل، چون هر دکمه سهم مساوی از این عرض را دارد) تنظیم می‌شود
-       تا در هیچ اندازه‌ای از صفحهٔ گوشی، نوشته از مستطیل دکمه بیرون نزند. */
-    container-type: inline-size;
-    container-name: ctlbar;
   }
   button.ctl{
     flex:1 1 0; min-width:0; width:0;
@@ -315,14 +308,6 @@
     -webkit-touch-callout:none;
     min-height:50px;
     height:50px;
-  }
-  /* مقیاس‌پذیری پیوسته: هرچه عرض نوار دکمه‌ها (و در نتیجه هر مستطیل) بزرگ‌تر
-     یا کوچک‌تر باشد، فونت هم به همان نسبت بزرگ یا کوچک می‌شود. در مرورگرهایی
-     که واحد cqw را پشتیبانی نکنند، این قانون نادیده گرفته می‌شود و رسانه‌های
-     پایین‌تر (max-width) به‌عنوان جایگزین اعمال می‌مانند. */
-  @container ctlbar (min-width: 0px){
-    button.ctl{ font-size: clamp(9px, 3.6cqw, 14px); }
-    button.ctl .ic{ font-size: clamp(12px, 4.6cqw, 16px); }
   }
   /* لمس پایدارتر روی موبایل: هر دکمه یک ناحیهٔ مستقل و مشخص دارد. */
   .controls button.ctl{
@@ -366,17 +351,21 @@
   .modal p{ color:var(--cream-dim); font-size:13px; margin:4px 0 18px;}
   .modal .row-btns{ display:flex; gap:10px; }
   .modal .row-btns button{ flex:1; }
-  /* پنجره‌ی ارزیابی دیگر قابل جابه‌جایی نیست: همیشه در انتهای صفحه‌ی شطرنج باز می‌شود. */
+  /* دستگیره‌ی کوچک برای جابه‌جا کردن پنجره‌ی ارزیابی روی صفحه */
   #evalModal{ position:relative; }
+  .drag-handle{
+    width:46px; height:5px; border-radius:3px; background:rgba(255,255,255,.35);
+    margin:-8px auto 14px; cursor:grab; touch-action:none; flex:0 0 auto;
+  }
+  .drag-handle:active{ cursor:grabbing; background:rgba(255,255,255,.6); }
   /* حالت «مستقر»: پنجره‌ی ارزیابی از همان‌جایی که ناحیه‌ی زیر صفحه‌ی شطرنج
      شروع می‌شود آغاز می‌شود، اما اگر متن تحلیل بیشتر جا لازم داشته باشد،
-     به‌جای فشرده و نامرئی شدن، به‌اندازه‌ی نیاز پایین‌تر می‌رود (با اسکرول داخلی
-     تا در گوشی‌های با صفحهٔ کوچک هم قابل خواندن باشد). */
+     به‌جای فشرده و نامرئی شدن، به‌اندازه‌ی نیاز پایین‌تر می‌رود (با اسکرول داخلی). */
   #evalModal.eval-docked{
     max-width:none; text-align:right; display:flex; flex-direction:column; overflow:hidden;
   }
-  /* متن ارزیابی از بالاترین ردیف پنجره شروع می‌شود (بدون عنوان بالای آن). */
-  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; min-height:70px; margin:0 0 10px; padding-inline-end:2px; }
+  #evalModal.eval-docked h2{ text-align:center; flex:0 0 auto; }
+  #evalModal.eval-docked #evalDesc{ overflow-y:auto; flex:1 1 auto; min-height:70px; margin:4px 0 10px; padding-inline-end:2px; }
   #evalModal.eval-docked #btnCloseEval{ flex:0 0 auto; }
   .pgn-moves{
     margin:12px 0 0; padding:10px 12px; max-height:260px; overflow:auto;
@@ -560,7 +549,6 @@
       <div>
         <div class="player-name">بازیکن سیاه</div>
         <div class="turn-tag">نوبت</div>
-        <div class="last-move" id="lastMoveBlack"></div>
       </div>
     </div>
     <button class="fullscreen-inline" id="fsBtn" title="تمام‌صفحه" aria-label="تمام‌صفحه">⛶</button>
@@ -585,7 +573,6 @@
       <div>
         <div class="player-name">بازیکن سفید</div>
         <div class="turn-tag">نوبت</div>
-        <div class="last-move" id="lastMoveWhite"></div>
       </div>
     </div>
     <div class="clock" id="clockWhite">10:00</div>
@@ -695,20 +682,10 @@
 <!-- Move evaluation modal -->
 <div class="overlay hidden" id="evalOverlay" style="background:transparent; pointer-events:none;">
   <div class="modal" id="evalModal" style="pointer-events:auto;">
+    <div class="drag-handle" id="evalDragHandle" title="برای جابه‌جایی این پنجره را بکشید"></div>
+    <h2 id="evalTitle">ارزیابی حرکت</h2>
     <p id="evalDesc" style="line-height:1.9;"></p>
     <button class="btn-big gold" id="btnCloseEval" style="width:100%;">بستن</button>
-  </div>
-</div>
-
-<!-- Cancel current game confirmation modal -->
-<div class="overlay hidden" id="cancelGameOverlay">
-  <div class="modal">
-    <h2 style="margin-bottom:10px;">تغییر حالت بازی</h2>
-    <p style="margin-bottom:18px;">آیا می‌خواهید این بازی را کنسل کنید؟</p>
-    <div class="row-btns">
-      <button class="btn-big gold" id="btnConfirmCancelGame">بله</button>
-      <button class="btn-big" id="btnDismissCancelGame">خیر</button>
-    </div>
   </div>
 </div>
 
@@ -1028,64 +1005,15 @@ function applyMoveMutate(state, move){
 }
 
 // legal moves for a square: pseudo moves filtered by "does not leave own king in check"
-// بررسی سریع «آیا این حرکت پادشاه خودمان را کیش‌خورده رها می‌کند؟» بدون
-// کپی کامل صفحه (که در نسخه‌ی قبلی برای هر حرکت شبه‌قانونی انجام می‌شد و
-// بزرگ‌ترین گلوگاه سرعت موتور بود). این تابع فقط خودِ صفحه (و موقعیت شاه در
-// صورت حرکت شاه) را موقتاً تغییر می‌دهد، وضعیت کیش را می‌سنجد، و بلافاصله
-// همه‌چیز را به حالت اول برمی‌گرداند — بدون هیچ تخصیص حافظه‌ی اضافه.
-function isLegalAfterMove(state, move){
-  const board = state.board;
-  const piece = board[move.fr][move.fc];
-  const color = piece.color;
-
-  let capturedPiece = null;
-  let epR = -1, epC = -1, epPiece = null;
-  if(move.enpassant){
-    epR = move.fr; epC = move.tc;
-    epPiece = board[epR][epC];
-    board[epR][epC] = null;
-  } else {
-    capturedPiece = board[move.tr][move.tc];
-  }
-
-  board[move.tr][move.tc] = piece;
-  board[move.fr][move.fc] = null;
-
-  let rookRow=-1, rookFromCol=-1, rookToCol=-1, rookPiece=null;
-  if(move.castle==='K' || move.castle==='Q'){
-    rookRow = move.fr;
-    rookFromCol = move.castle==='K' ? 7 : 0;
-    rookToCol = move.castle==='K' ? 5 : 3;
-    rookPiece = board[rookRow][rookFromCol];
-    board[rookRow][rookToCol] = rookPiece;
-    board[rookRow][rookFromCol] = null;
-  }
-
-  const prevKingPos = piece.type==='k' ? state.kings[color] : null;
-  if(piece.type==='k') state.kings[color] = {r:move.tr, c:move.tc};
-
-  const inCheck = kingInCheck(state, color);
-
-  // بازگرداندن کامل صفحه به حالت پیش از آزمایش
-  board[move.fr][move.fc] = piece;
-  board[move.tr][move.tc] = capturedPiece;
-  if(move.enpassant) board[epR][epC] = epPiece;
-  if(rookRow!==-1){
-    board[rookRow][rookFromCol] = rookPiece;
-    board[rookRow][rookToCol] = null;
-  }
-  if(prevKingPos) state.kings[color] = prevKingPos;
-
-  return !inCheck;
-}
-
 function legalMovesFor(state, r, c){
   const piece = state.board[r][c];
   if(!piece) return [];
   const pseudo = pseudoMoves(state, r, c);
   const legal = [];
   for(const m of pseudo){
-    if(isLegalAfterMove(state, m)) legal.push(m);
+    const test = cloneState(state);
+    applyMoveMutate(test, m);
+    if(!kingInCheck(test, piece.color)) legal.push(m);
   }
   return legal;
 }
@@ -1214,17 +1142,9 @@ function evaluateBoard(state){
   return score;
 }
 
-// captures first (MVV-LVA-ish) for better alpha-beta pruning; an optional
-// `preferredMove` (from the transposition table or a previous ID pass) is
-// tried first since it is very likely to be the best move here.
-function orderMoves(state, moves, preferredMove){
+// captures first (MVV-LVA-ish) for better alpha-beta pruning
+function orderMoves(state, moves){
   return moves.slice().sort((a,b)=>{
-    if(preferredMove){
-      const aPref = a.fr===preferredMove.fr && a.fc===preferredMove.fc && a.tr===preferredMove.tr && a.tc===preferredMove.tc;
-      const bPref = b.fr===preferredMove.fr && b.fc===preferredMove.fc && b.tr===preferredMove.tr && b.tc===preferredMove.tc;
-      if(aPref && !bPref) return -1;
-      if(bPref && !aPref) return 1;
-    }
     const va = a.capture ? (ENGINE_VALUE[(state.board[a.tr][a.tc]||{type:'p'}).type] - ENGINE_VALUE[state.board[a.fr][a.fc].type]/10) : -1000;
     const vb = b.capture ? (ENGINE_VALUE[(state.board[b.tr][b.tc]||{type:'p'}).type] - ENGINE_VALUE[state.board[b.fr][b.fc].type]/10) : -1000;
     return vb - va;
@@ -1245,100 +1165,36 @@ function aiSearchCheckpoint(){
   }
 }
 
-// جدول تراپوزیشن (Transposition Table): موقعیت‌های یکسانی که از راه‌های
-// مختلفی به آن‌ها رسیده باشیم را کش می‌کند تا جست‌وجوی عمیق‌تر در همان
-// زمان ممکن شود. کلید، یک رشته‌ی فشرده از صفحه + نوبت + حقوق قلعه/آن‌پاسان است.
-let TT = new Map();
-const TT_MAX_SIZE = 2000000;
-const TT_EXACT = 0, TT_LOWER = 1, TT_UPPER = 2;
-
-function stateKey(state){
-  let s = '';
-  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
-    const p = state.board[r][c];
-    s += p ? (p.color + p.type) : '..';
-  }
-  s += state.turn;
-  s += state.castling.wK?'1':'0';
-  s += state.castling.wQ?'1':'0';
-  s += state.castling.bK?'1':'0';
-  s += state.castling.bQ?'1':'0';
-  s += state.ep ? ('e'+state.ep.r+state.ep.c) : 'e-';
-  return s;
-}
-
-// جست‌وجوی سکون (Quiescence Search): در انتهای عمق جست‌وجو، به‌جای برداشتن
-// یک ارزیابی ایستا در وسط یک زنجیره‌ی مهره‌خوری، فقط حرکت‌های ضربه‌ای را تا
-// آرام شدن موقعیت ادامه می‌دهد. این دقیقاً همان چیزی است که جلوی «دادن مهره
-// به‌رایگان در عمق آخر» را می‌گیرد و بزرگ‌ترین ضعف تاکتیکی موتور قبلی بود.
-function quiescence(state, alpha, beta, color, qdepth){
-  aiSearchCheckpoint();
-  const ev = evaluateBoard(state);
-  const standPat = color==='w' ? ev : -ev;
-  if(standPat >= beta) return beta;
-  if(alpha < standPat) alpha = standPat;
-  if(qdepth <= 0) return alpha;
-
-  const captures = allLegalMoves(state, color).filter(m=>m.capture || m.promotion);
-  if(!captures.length) return alpha;
-  const ordered = orderMoves(state, captures);
-  for(const m of ordered){
-    const next = cloneState(state);
-    applyMoveMutate(next, m);
-    const sc = -quiescence(next, -beta, -alpha, opp(color), qdepth-1);
-    if(sc >= beta) return beta;
-    if(sc > alpha) alpha = sc;
-  }
-  return alpha;
-}
-
 function negamax(state, depth, alpha, beta, color){
   aiSearchCheckpoint();
-  const alphaOrig = alpha;
-  const key = stateKey(state);
-  const cached = TT.get(key);
-  if(cached && cached.depth >= depth){
-    if(cached.flag === TT_EXACT) return cached.score;
-    if(cached.flag === TT_LOWER) alpha = Math.max(alpha, cached.score);
-    else if(cached.flag === TT_UPPER) beta = Math.min(beta, cached.score);
-    if(alpha >= beta) return cached.score;
-  }
-
   const moves = allLegalMoves(state, color);
   if(moves.length===0){
     if(kingInCheck(state,color)) return -99000 - depth; // checkmate: worse the sooner it happens for the mover... prefer faster mates for the winner
     return 0; // stalemate
   }
   if(depth===0){
-    return quiescence(state, alpha, beta, color, 4);
+    const ev = evaluateBoard(state);
+    return color==='w' ? ev : -ev;
   }
-  const ordered = orderMoves(state, moves, cached && cached.move);
+  const ordered = orderMoves(state, moves);
   let best = -Infinity;
-  let bestMove = null;
   for(const m of ordered){
     const next = cloneState(state);
     applyMoveMutate(next, m);
     const sc = -negamax(next, depth-1, -beta, -alpha, opp(color));
-    if(sc>best){ best = sc; bestMove = m; }
+    if(sc>best) best = sc;
     if(best>alpha) alpha = best;
     if(alpha>=beta) break;
   }
-
-  let flag = TT_EXACT;
-  if(best <= alphaOrig) flag = TT_UPPER;
-  else if(best >= beta) flag = TT_LOWER;
-  if(TT.size > TT_MAX_SIZE) TT.clear();
-  TT.set(key, { depth, score:best, flag, move:bestMove });
-
   return best;
 }
 
 // returns { move, score } — the best move for the side to move in `state`, score from its perspective
-function searchBestMove(state, depth, rootHint){
+function searchBestMove(state, depth){
   const color = state.turn;
   const moves = allLegalMoves(state, color);
   if(moves.length===0) return null;
-  const ordered = orderMoves(state, moves, rootHint);
+  const ordered = orderMoves(state, moves);
   let alpha=-Infinity, beta=Infinity;
   let bestMove = ordered[0], bestScore = -Infinity;
   for(const m of ordered){
@@ -1359,13 +1215,13 @@ function searchBestMoveTimed(state, maxDepth, timeBudgetMs){
   if(legal.length===1) return {move:legal[0], score:0, depth:1, timedOut:false};
 
   const start = performance.now();
-  const safeBudget = Math.max(180, Math.min(9000, Number(timeBudgetMs)||500));
+  const safeBudget = Math.max(180, Math.min(3200, Number(timeBudgetMs)||500));
   let best = {move:orderMoves(state, legal)[0], score:-Infinity, depth:0, timedOut:false};
 
   for(let depth=1; depth<=maxDepth; depth++){
     AI_SEARCH_CTX = { deadline:start+safeBudget, nodes:0 };
     try{
-      const result = searchBestMove(state, depth, best.move);
+      const result = searchBestMove(state, depth);
       if(result){
         best = { ...result, depth, timedOut:false, nodes:AI_SEARCH_CTX.nodes };
       }
@@ -1394,24 +1250,159 @@ function moveQualityLabel(loss){
 /* =========================================================
    AI LEVEL SYSTEM
    One chess engine, ten playing personalities.
+   سطوح ۱ تا ۳ با موتور سبک داخلی (برای حالت مبتدی و انسانی‌تر) اجرا می‌شوند و
+   سطوح ۴ تا ۱۰ واقعاً توسط استاک‌فیش (Stockfish 18، نسخهٔ lite-single) با
+   قدرت واقعی محدودشده بازی می‌کنند تا قدرت و رفتار ربات هماهنگ و پیوسته باشد.
 ========================================================= */
 const AI_LEVELS = {
-  1:  { name:'متوسط',       depth:2, randomness:0.16, blunder:0.09,  think:500,  topMoves:2, captureBias:0.90 },
-  2:  { name:'معمولی',      depth:3, randomness:0.10, blunder:0.06,  think:650,  topMoves:2, captureBias:0.94 },
-  3:  { name:'خوب',         depth:4, randomness:0.05, blunder:0.03,  think:850,  topMoves:2, captureBias:0.97 },
-  4:  { name:'قوی',         depth:5, randomness:0.02, blunder:0.012, think:1300, topMoves:1, captureBias:1.00 },
-  5:  { name:'خیلی قوی',    depth:6, randomness:0.01, blunder:0.006, think:2000, topMoves:1, captureBias:1.00 },
-  6:  { name:'حرفه‌ای',     depth:7, randomness:0.004,blunder:0.0,   think:2800, topMoves:1, captureBias:1.00 },
-  7:  { name:'استاد',       depth:8, randomness:0.0,  blunder:0.0,   think:3800, topMoves:1, captureBias:1.00 },
-  8:  { name:'استاد بزرگ',  depth:9, randomness:0.0,  blunder:0.0,   think:5000, topMoves:1, captureBias:1.00 },
-  9:  { name:'قهرمان',      depth:10,randomness:0.0,  blunder:0.0,   think:6500, topMoves:1, captureBias:1.00 },
-  10: { name:'جهانی',       depth:11,randomness:0.0,  blunder:0.0,   think:8000, topMoves:1, captureBias:1.00 }
+  1:  { name:'متوسط',      depth:2, randomness:0.16, blunder:0.09,  think:500,  topMoves:2, captureBias:0.90, engine:'local' },
+  2:  { name:'معمولی',     depth:3, randomness:0.10, blunder:0.06,  think:650,  topMoves:2, captureBias:0.94, engine:'local' },
+  3:  { name:'خوب',        depth:4, randomness:0.05, blunder:0.03,  think:850,  topMoves:2, captureBias:0.97, engine:'local' },
+  4:  { name:'قوی',        depth:5, randomness:0.02, blunder:0.012, think:700,  topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:1350 },
+  5:  { name:'خیلی قوی',   depth:5, randomness:0.01, blunder:0.006, think:900,  topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:1600 },
+  6:  { name:'حرفه‌ای',    depth:6, randomness:0.004,blunder:0.0,   think:1100, topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:1900 },
+  7:  { name:'استاد',      depth:7, randomness:0.0,  blunder:0.0,   think:1400, topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:2200 },
+  8:  { name:'استاد بزرگ', depth:7, randomness:0.0,  blunder:0.0,   think:1700, topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:2500 },
+  9:  { name:'نابغه',      depth:7, randomness:0.0,  blunder:0.0,   think:2000, topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:2850 },
+  10: { name:'نامغلوب',    depth:7, randomness:0.0,  blunder:0.0,   think:2500, topMoves:1, captureBias:1.00, engine:'stockfish', sfElo:null }
 };
 
 function aiProfile(level){
   const n = Math.max(1, Math.min(10, Number(level)||10));
   return AI_LEVELS[n];
 }
+
+// تبدیل وضعیت فعلی بازی به رشتهٔ استاندارد FEN تا بتوان آن را به موتور
+// استاک‌فیش (که با پروتکل UCI کار می‌کند) ارسال کرد.
+function toFEN(state){
+  const rows = [];
+  for(let r=0;r<8;r++){
+    let row = '', empty = 0;
+    for(let c=0;c<8;c++){
+      const p = state.board[r][c];
+      if(!p){ empty++; continue; }
+      if(empty){ row += empty; empty = 0; }
+      row += (p.color==='w') ? p.type.toUpperCase() : p.type;
+    }
+    if(empty) row += empty;
+    rows.push(row);
+  }
+  const boardStr = rows.join('/');
+  let castling = '';
+  if(state.castling.wK) castling += 'K';
+  if(state.castling.wQ) castling += 'Q';
+  if(state.castling.bK) castling += 'k';
+  if(state.castling.bQ) castling += 'q';
+  if(!castling) castling = '-';
+  const ep = state.ep ? (FILES[state.ep.c] + (8 - state.ep.r)) : '-';
+  return `${boardStr} ${state.turn} ${castling} ${ep} ${state.halfmove} ${state.fullmove}`;
+}
+
+// تبدیل حرکت UCI (مثل e2e4 یا e7e8q) که از استاک‌فیش دریافت می‌شود، به
+// شیء حرکتِ داخلی بازی، با تطبیق آن روی فهرست حرکت‌های قانونی فعلی تا همهٔ
+// پرچم‌های حرکت (کیش، آن‌پاسان، قلعه و...) درست حفظ شوند.
+function uciToMove(state, uci){
+  if(!uci || uci.length < 4) return null;
+  const fc = FILES.indexOf(uci[0]);
+  const fr = 8 - Number(uci[1]);
+  const tc = FILES.indexOf(uci[2]);
+  const tr = 8 - Number(uci[3]);
+  const promo = uci.length >= 5 ? uci[4].toLowerCase() : null;
+  if(fc<0 || tc<0 || Number.isNaN(fr) || Number.isNaN(tr)) return null;
+  const legal = allLegalMoves(state, state.turn);
+  const candidates = legal.filter(m=>m.fr===fr && m.fc===fc && m.tr===tr && m.tc===tc);
+  if(!candidates.length) return null;
+  if(candidates.length===1) return candidates[0];
+  const withPromo = candidates.find(m=>m.promotion && (m.promoType||'q')===(promo||'q'));
+  return withPromo || candidates[0];
+}
+
+/* =========================================================
+   STOCKFISH ENGINE BRIDGE
+   موتور واقعی استاک‌فیش به‌صورت Worker محلی (بدون نیاز به اینترنت) بارگذاری
+   می‌شود. اگر به هر دلیلی مرورگر/وب‌ویو از Worker یا WASM پشتیبانی نکند،
+   بازی به‌طور خودکار به موتور داخلی سبک برمی‌گردد و هرگز قفل نمی‌شود.
+========================================================= */
+const SF = (function(){
+  let worker = null;
+  let ready = false;
+  let failed = false;
+  let onBestMove = null;
+  let configuredLevel = null;
+
+  function post(cmd){ try{ worker.postMessage(cmd); }catch(e){ fail(); } }
+
+  function fail(){
+    failed = true;
+    ready = false;
+    if(onBestMove){ const cb = onBestMove; onBestMove = null; cb(null); }
+    try{ if(worker) worker.terminate(); }catch(e){}
+    worker = null;
+  }
+
+  function handleLine(line){
+    if(typeof line !== 'string') return;
+    if(line === 'uciok'){
+      post('setoption name Hash value 16');
+      post('isready');
+    } else if(line === 'readyok'){
+      ready = true;
+    } else if(line.indexOf('bestmove') === 0){
+      const parts = line.split(' ');
+      const mv = parts[1];
+      if(onBestMove){
+        const cb = onBestMove;
+        onBestMove = null;
+        cb(mv && mv !== '(none)' ? mv : null);
+      }
+    }
+  }
+
+  function init(){
+    if(worker || failed) return;
+    if(typeof Worker === 'undefined'){ failed = true; return; }
+    try{
+      worker = new Worker('js/stockfish/stockfish-18-lite-single.js');
+    }catch(e){ failed = true; worker = null; return; }
+    worker.onerror = function(){ fail(); };
+    worker.onmessage = function(e){
+      const data = e && e.data;
+      if(typeof data === 'string') handleLine(data);
+    };
+    post('uci');
+  }
+
+  function isUsable(){
+    if(!worker && !failed) init();
+    return ready && !failed;
+  }
+
+  function configureLevel(level, sfElo){
+    if(configuredLevel === level) return;
+    configuredLevel = level;
+    if(sfElo){
+      post('setoption name UCI_LimitStrength value true');
+      post('setoption name UCI_Elo value ' + sfElo);
+    } else {
+      post('setoption name UCI_LimitStrength value false');
+      post('setoption name Skill Level value 20');
+    }
+  }
+
+  // onSuccess(uciMoveString) / onFail() — یکی از این دو همیشه صدا زده می‌شود.
+  function findMove(state, level, sfElo, movetime, onSuccess, onFail){
+    if(!isUsable()){ onFail(); return; }
+    if(onBestMove){ onFail(); return; } // یک درخواست هم‌زمان کافی است
+    configureLevel(level, sfElo);
+    onBestMove = function(uci){
+      if(uci) onSuccess(uci); else onFail();
+    };
+    post('position fen ' + toFEN(state));
+    post('go movetime ' + Math.max(200, movetime||1000));
+  }
+
+  return { init, isUsable, findMove };
+})();
 
 function randomUnit(){ return Math.random(); }
 
@@ -1518,6 +1509,12 @@ function chooseAIResult(state, level){
   return {move:chosen.move,score:chosen.score,profile};
 }
 
+function aiThinkingDelay(level){
+  const p = aiProfile(level);
+  const jitter = p.think > 300 ? Math.floor(Math.random()*180) : Math.floor(Math.random()*100);
+  return p.think + jitter;
+}
+
 function setAILevel(level){
   Game.aiLevel = Math.max(1, Math.min(10, Number(level)||10));
   document.querySelectorAll('#aiLevelGrid button').forEach(b=>
@@ -1542,7 +1539,7 @@ function resetAILevel(){ setAILevel(Game.aiLevel || loadSavedAILevel()); }
 function updatePlayerNames(){
   const blackName = document.querySelector('#barBlack .player-name');
   const whiteName = document.querySelector('#barWhite .player-name');
-  const robotName = 'ربات - سطح ' + (Game.aiLevel || 10);
+  const robotName = 'ربات - سطح ' + (Game.aiLevel || 7);
   if(blackName) blackName.textContent = Game.vsAI && Game.aiColor === 'b' ? robotName : 'بازیکن سیاه';
   if(whiteName) whiteName.textContent = Game.vsAI && Game.aiColor === 'w' ? robotName : 'بازیکن سفید';
 }
@@ -1617,7 +1614,7 @@ function saveLastGame(){
       vsAI: !!Game.vsAI,
       humanColor: Game.humanColor || 'w',
       aiColor: Game.aiColor || 'b',
-      aiLevel: Game.aiLevel || 10,
+      aiLevel: Game.aiLevel || 7,
       boardFlipped: !!Game.boardFlipped,
       history: Game.history.map(encodeState),
       moveLog: Game.moveLog,
@@ -1642,7 +1639,7 @@ function loadLastGame(){
     Game.vsAI = !!data.vsAI;
     Game.humanColor = data.humanColor==='b' ? 'b' : 'w';
     Game.aiColor = data.aiColor==='w' ? 'w' : 'b';
-    Game.aiLevel = Math.max(1, Math.min(10, Number(data.aiLevel)||10));
+    Game.aiLevel = Math.max(1, Math.min(7, Number(data.aiLevel)||7));
     Game.boardFlipped = !!data.boardFlipped;
     Game.history = data.version===2 ? data.history.map(decodeState) : data.history;
     Game.moveLog = Array.isArray(data.moveLog) ? data.moveLog : [];
@@ -1708,7 +1705,7 @@ const Game = {
   humanColor: 'w',   // the human side in robot mode
   aiColor: 'b',       // the robot side in robot mode
   aiThinking: false,
-  aiLevel: 10
+  aiLevel: 7
 };
 
 function currentState(){ return Game.history[Game.ply]; }
@@ -2114,8 +2111,34 @@ function maybeTriggerAIMove(){
   Game.aiThinking = true;
   renderStatus();
   renderButtons();
-  // بدون تأخیر ساختگی: فقط یک تیک کوتاه تا وضعیت «در حال فکر کردن» رندر شود،
-  // سپس محاسبه بلافاصله با زمان واقعی خودش اجرا می‌شود (بدون افزودن تأخیر مصنوعی).
+
+  const profile = aiProfile(level);
+  if(profile.engine === 'stockfish' && SF.isUsable()){
+    SF.findMove(
+      state, level, profile.sfElo, profile.think,
+      (uci)=>{ finishAIMoveFromEngine(uci); },
+      ()=>{ runLocalAIMove(level); } // اگر استاک‌فیش پاسخ نداد، به موتور داخلی برمی‌گردیم
+    );
+    return;
+  }
+  runLocalAIMove(level);
+}
+
+// وقتی استاک‌فیش حرکت را برگرداند، آن را روی وضعیت فعلی تطبیق می‌دهیم و اجرا می‌کنیم.
+function finishAIMoveFromEngine(uci){
+  if(!Game.vsAI || Game.gameOver || Game.reviewMode){ Game.aiThinking=false; renderButtons(); return; }
+  const state2 = currentState();
+  if(state2.turn !== Game.aiColor){ Game.aiThinking=false; renderButtons(); return; }
+  Game.aiThinking = false;
+  const move = uciToMove(state2, uci);
+  if(move){ doMove(move); return; }
+  // اگر تطبیق حرکت ناموفق بود (مثلاً رشتهٔ غیرمنتظره)، به موتور داخلی برمی‌گردیم.
+  runLocalAIMove(Game.aiLevel || 1);
+}
+
+// مسیر پشتیبان: موتور سبک داخلی جاوااسکریپتی. هم برای سطوح ۱ تا ۳ استفاده
+// می‌شود و هم زمانی که استاک‌فیش در دسترس نباشد یا خطا بدهد.
+function runLocalAIMove(level){
   setTimeout(()=>{
     if(!Game.vsAI || Game.gameOver || Game.reviewMode){ Game.aiThinking=false; renderButtons(); return; }
     const state2 = currentState();
@@ -2134,7 +2157,7 @@ function maybeTriggerAIMove(){
     Game.aiThinking = false;
     if(result) doMove(result.move);
     else renderButtons();
-  }, 0);
+  }, aiThinkingDelay(level));
 }
 
 function buildMoveText(state, move){
@@ -2420,35 +2443,16 @@ function renderCaptured(){
   advWhiteEl.textContent = '';
 
   const faNum = n => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-  // فقط عدد اختلاف امتیاز، همراه با علامت + یا -، کنار مهره‌های زده‌شده نشان داده می‌شود.
   if(diff > 0){
     // سفید مهرهٔ بیشتری گرفته، پس سیاه عقب است و سفید جلو.
-    advBlackEl.textContent = `${faNum(diff)}-`;
-    advWhiteEl.textContent = `${faNum(diff)}+`;
+    advBlackEl.textContent = `شما ${faNum(diff)} امتیاز عقب هستید`;
+    advWhiteEl.textContent = `شما ${faNum(diff)} امتیاز جلو هستید`;
   } else if(diff < 0){
     const d = -diff;
     // سیاه مهرهٔ بیشتری گرفته، پس سیاه جلو است و سفید عقب.
-    advBlackEl.textContent = `${faNum(d)}+`;
-    advWhiteEl.textContent = `${faNum(d)}-`;
+    advBlackEl.textContent = `شما ${faNum(d)} امتیاز جلو هستید`;
+    advWhiteEl.textContent = `شما ${faNum(d)} امتیاز عقب هستید`;
   }
-}
-
-// زیر نام هر بازیکن، شمارهٔ حرکت و آخرین حرکتِ خودِ او را شبیه نوشتار PGN نشان می‌دهد.
-function renderLastMoves(){
-  const wEl = document.getElementById('lastMoveWhite');
-  const bEl = document.getElementById('lastMoveBlack');
-  if(!wEl || !bEl) return;
-  const log = Game.reviewMode ? Game.moveLog.slice(0, Game.reviewPly) : Game.moveLog.slice(0, Game.ply);
-  let wText = '', bText = '';
-  for(let i=log.length-1; i>=0; i--){
-    const mv = log[i];
-    const moveNumber = Math.floor(i/2)+1;
-    if(mv.color==='w' && !wText) wText = `${moveNumber}. ${mv.san}`;
-    if(mv.color==='b' && !bText) bText = `${moveNumber}...${mv.san}`;
-    if(wText && bText) break;
-  }
-  wEl.textContent = wText;
-  bEl.textContent = bText;
 }
 
 function renderStatus(){
@@ -2480,7 +2484,6 @@ function renderAll(){
   renderBoard();
   renderClocks();
   renderCaptured();
-  renderLastMoves();
   renderStatus();
   renderButtons();
 }
@@ -2885,32 +2888,8 @@ function setMode(vsAI){
     startNewGame(Game.timeMinutes || 10, null);
   }
 }
-// اگر بازی در حال انجام باشد، قبل از تعویض حالت (دو نفره / با ربات) از کاربر
-// تأیید می‌گیریم که آیا واقعاً می‌خواهد بازی جاری را کنسل کند یا نه.
-let pendingModeChange = null;
-function isGameInProgress(){
-  return !Game.reviewMode && !Game.gameOver && Game.ply > 0;
-}
-function requestModeChange(vsAI){
-  if(Game.vsAI === vsAI) return; // از قبل همین حالت فعال است
-  if(isGameInProgress()){
-    pendingModeChange = vsAI;
-    showOverlay('cancelGameOverlay');
-  } else {
-    setMode(vsAI);
-  }
-}
-document.getElementById('btnConfirmCancelGame').addEventListener('click', ()=>{
-  hideOverlay('cancelGameOverlay');
-  if(pendingModeChange !== null){ setMode(pendingModeChange); pendingModeChange = null; }
-});
-document.getElementById('btnDismissCancelGame').addEventListener('click', ()=>{
-  hideOverlay('cancelGameOverlay');
-  pendingModeChange = null;
-});
-
-safeControlTap(document.getElementById('btnMode2P'), ()=>requestModeChange(false));
-safeControlTap(document.getElementById('btnModeAI'), ()=>requestModeChange(true));
+safeControlTap(document.getElementById('btnMode2P'), ()=>setMode(false));
+safeControlTap(document.getElementById('btnModeAI'), ()=>setMode(true));
 
 safeControlTap(document.getElementById('btnHint'), showHint);
 safeControlTap(document.getElementById('btnEval'), ()=>{
@@ -2963,6 +2942,51 @@ document.getElementById('btnFirstRunAI').addEventListener('click', ()=>{
 });
 
 document.getElementById('btnCloseEval').addEventListener('click', ()=>{ hideOverlay('evalOverlay'); });
+
+// امکان جابه‌جا کردن (درگ کردن) پنجره‌ی ارزیابی در هر جهت،
+// تا کاربر بتواند هم‌زمان صفحه‌ی شطرنج زیرِ آن را ببیند.
+(function initEvalDrag(){
+  const modal = document.getElementById('evalModal');
+  const handle = document.getElementById('evalDragHandle');
+  if(!modal || !handle) return;
+  let dragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+  function onPointerDown(e){
+    dragging = true;
+    const rect = modal.getBoundingClientRect();
+    // از حالت وسط‌چین‌شده با flex به مختصات ثابت تبدیل می‌شود تا بتوان آزادانه جابه‌جا کرد
+    modal.style.position = 'fixed';
+    modal.style.margin = '0';
+    modal.style.left = rect.left + 'px';
+    modal.style.top = rect.top + 'px';
+    startLeft = rect.left;
+    startTop = rect.top;
+    startX = e.clientX;
+    startY = e.clientY;
+    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+    e.preventDefault();
+  }
+  function onPointerMove(e){
+    if(!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const rect = modal.getBoundingClientRect();
+    const maxLeft = window.innerWidth - rect.width - 4;
+    const maxTop = window.innerHeight - rect.height - 4;
+    const newLeft = Math.max(4, Math.min(maxLeft, startLeft + dx));
+    const newTop = Math.max(4, Math.min(maxTop, startTop + dy));
+    modal.style.left = newLeft + 'px';
+    modal.style.top = newTop + 'px';
+  }
+  function onPointerUp(e){
+    dragging = false;
+    try{ handle.releasePointerCapture(e.pointerId); }catch(err){}
+  }
+  handle.addEventListener('pointerdown', onPointerDown);
+  handle.addEventListener('pointermove', onPointerMove);
+  handle.addEventListener('pointerup', onPointerUp);
+  handle.addEventListener('pointercancel', onPointerUp);
+})();
 
 // هر بار که پنجره‌ی ارزیابی باز می‌شود، از همان‌جایی که ناحیه‌ی زیر صفحه‌ی
 // شطرنج (نوار وضعیت + دکمه‌های پایینی) شروع می‌شود می‌نشیند تا همان‌جا را
@@ -3085,10 +3109,13 @@ function analyzeHalfMove(idx){
 
 function showLastMoveEvaluation(){
   if(Game.reviewMode) return;
+  const evalTitleEl = document.getElementById('evalTitle');
   const evalDescEl = document.getElementById('evalDesc');
   try{ resetEvalModalPosition(); }catch(e){ /* اگر اندازه‌گیری صفحه با خطا مواجه شد، بازهم ادامه بده */ }
 
   if(Game.ply===0){
+    evalTitleEl.textContent = 'ارزیابی حرکت';
+    evalTitleEl.style.color = 'var(--gold)';
     evalDescEl.innerHTML = 'هنوز حرکتی انجام نشده است.';
     showOverlay('evalOverlay');
     return;
@@ -3100,6 +3127,8 @@ function showLastMoveEvaluation(){
   const indices = [];
   for(let i=startIdx; i<=lastIdx; i++) indices.push(i);
 
+  evalTitleEl.textContent = indices.length>1 ? 'ارزیابی دو حرکت آخر' : 'ارزیابی حرکت';
+  evalTitleEl.style.color = 'var(--gold)';
   evalDescEl.innerHTML = 'در حال تحلیل دقیق حرکت‌ها...';
   showOverlay('evalOverlay');
 
@@ -3115,7 +3144,8 @@ function showLastMoveEvaluation(){
           ? (r.pawnsAfterWhite>0 ? 'مات به نفع سفید' : 'مات به نفع سیاه')
           : (r.pawnsAfterWhite>0?'+':'') + r.pawnsAfterWhite.toFixed(2);
         html += `<div style="${i>0?'margin-top:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.15);':''}">`;
-        html += `<div style="font-weight:bold; margin-bottom:4px;">حرکت ${r.moveNumber} (${colorLabel}): <span style="color:var(--cream)">${r.playedSan}</span></div>`;
+        html += `<div style="font-weight:bold; margin-bottom:4px;">حرکت ${r.moveNumber} (${colorLabel}): <span style="color:var(--cream)">${r.playedSan}</span> — <span style="color:${r.q.color}">${r.q.text}</span></div>`;
+        html += `<div style="font-size:0.92em; opacity:0.9; margin-bottom:2px;">افت ارزیابی نسبت به بهترین حرکت ممکن: <b>${(r.loss/100).toFixed(2)}</b> پیاده</div>`;
         if(r.bestSan && r.bestSan!==r.playedSan && r.loss>15){
           html += `<div style="font-size:0.92em; margin-bottom:2px;">حرکت بهتر بود: <b style="color:var(--gold)">${r.bestSan}</b></div>`;
           if(r.alternatives.length){
@@ -3215,6 +3245,9 @@ fsBtn.addEventListener('click', ()=>{
    INIT
 ========================================================= */
 buildBoardDom();
+// موتور استاک‌فیش را زودتر و بی‌صدا آماده می‌کنیم تا اولین حرکت ربات معطل نماند؛
+// اگر بارگذاری آن با خطا مواجه شود، بازی بدون وقفه با موتور داخلی ادامه می‌یابد.
+try{ SF.init(); }catch(e){}
 // پیش‌فرض برنامه: صفحهٔ اصلی با مهره‌های چیده‌شده در حالت «دو نفره».
 // حالت «با ربات» فقط با انتخاب کاربر از پایین صفحه فعال می‌شود و آن‌موقع
 // صفحهٔ «بازی جدید» باز خواهد شد (نگاه کنید به تابع setMode).
