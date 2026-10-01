@@ -285,9 +285,8 @@
   body.set-new:not(.mode-ai) .piece,
   body.set-new:not(.mode-ai) .piece.p-pawn{ width:100%; height:100%; border-radius:0; }
   body.set-new:not(.mode-ai) .capstrip .cap-icon{ border-radius:0; }
-  #pieceStyleChooser{ display:none; margin-bottom:14px; }
-  body.mode-2p #pieceStyleChooser{ display:block; }
-  body.mode-ai #pieceStyleChooser{ display:none; }
+  #btnPieceStyle{ display:none; flex:0 0 52px !important; font-size:22px !important; padding:6px 0 !important; }
+  body.mode-2p #btnPieceStyle{ display:block; }
   #pieceGrid button.sel{
     color:#FFD84D !important; font-weight:900; background:#6B8585 !important;
     border-color:#FFD84D !important; text-shadow:0 1px 2px rgba(0,0,0,.25);
@@ -563,6 +562,7 @@
   <div class="modebar">
     <button class="mode-btn active" id="btnMode2P">شطرنج دو نفره</button>
     <button class="mode-btn" id="btnModeAI">شطرنج با ربات</button>
+    <button class="mode-btn" id="btnPieceStyle" title="مدل مهره‌ها">♞</button>
   </div>
 
   <div class="playerbar" id="barBlack">
@@ -687,13 +687,6 @@ ranjberan@gmail.com<br>
         <button data-level="10">سطح دهم</button>
       </div>
     </div>
-    <div id="pieceStyleChooser">
-      <p style="margin-bottom:10px;">مدل مهره‌ها را انتخاب کنید</p>
-      <div class="setup-grid" id="pieceGrid">
-        <button data-style="classic" class="sel"><span class="pv" id="pvClassic"></span>مهره‌های قبلی</button>
-        <button data-style="new"><span class="pv" id="pvNew"></span>مهره‌های جدید</button>
-      </div>
-    </div>
     <p>زمان فکر هر بازیکن را انتخاب کنید</p>
     <div class="setup-grid" id="timeGrid">
       <button data-min="3">۳ دقیقه</button>
@@ -725,6 +718,19 @@ ranjberan@gmail.com<br>
 </div>
 
 <!-- End game modal -->
+<div class="overlay hidden" id="pieceStyleOverlay">
+  <div class="modal">
+    <h2>مدل مهره‌ها</h2>
+    <div id="pieceStyleChooser">
+      <div class="setup-grid" id="pieceGrid" style="margin:14px 0;">
+        <button data-style="classic" class="sel"><span class="pv" id="pvClassic"></span>مهره‌های قبلی</button>
+        <button data-style="new"><span class="pv" id="pvNew"></span>مهره‌های جدید</button>
+      </div>
+    </div>
+    <button class="btn-big gold" id="btnClosePieceStyle" style="width:100%;">تأیید</button>
+  </div>
+</div>
+
 <div class="overlay hidden" id="cancelGameOverlay">
   <div class="modal">
     <h2>کنسل کردن بازی</h2>
@@ -3311,6 +3317,8 @@ function setPieceStyle(style){
 document.querySelectorAll('#pieceGrid button').forEach(b=>{
   b.addEventListener('click', ()=> setPieceStyle(b.dataset.style));
 });
+document.getElementById('btnPieceStyle').addEventListener('click', ()=> showOverlay('pieceStyleOverlay'));
+document.getElementById('btnClosePieceStyle').addEventListener('click', ()=> hideOverlay('pieceStyleOverlay'));
 (function(){
   let saved = 'classic';
   try { saved = localStorage.getItem('chess_piece_style') || 'classic'; } catch(e) {}
